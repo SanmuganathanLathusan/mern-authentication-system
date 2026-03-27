@@ -1,19 +1,38 @@
 import express from "express";
 import cors from "cors";
-import 'dotenv/config';
-import cookieParser from "cookie-parser";
-import authRouter from './routes/authRoutes.js'
+import "dotenv/config";
+import connectDB from "./config/mongodb.js";
+import authRoutes from "./routes/authRoutes.js";
 
 const app = express();
-const port = process.env.PORT || 4000;
-import connectDB from "./config/mongodb.js";
+const PORT = process.env.PORT || 5000;
 
-app.use(express.json());   // ✅ fixed here
-app.use(cookieParser());
+// Connect to MongoDB
 connectDB();
-app.use(cors({ credentials: true }));
 
-//Api End point
-app.get("/" , (req,res) => res.send("API Workking "));
-app.use('/api/auth',authRouter)
-app.listen(port, () => console.log(`Server started on PORT: ${port}`));
+// Middleware
+app.use(express.json()); // Parses incoming JSON payloads
+app.use(express.urlencoded({ extended: false })); // Parses urlencoded payloads
+app.use(cors()); // Enables cross-origin requests
+
+// Routes
+app.use("/api/auth", authRoutes);
+
+// Base route for sanity check
+app.get("/", (req, res) => res.send("MERN Authentication System API is running..."));
+
+// Error handling middleware for catching and formatting errors cleanly
+app.use((err, req, res, next) => {
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({
+    success: false,
+    message: err.message,
+    // Provide stack trace only if not in production
+    stack: process.env.NODE_ENV === "production" ? null : err.stack,
+  });
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

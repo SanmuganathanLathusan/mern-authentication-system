@@ -1,17 +1,29 @@
 import mongoose from "mongoose";
 
+// Define the User schema structure
+const userSchema = new mongoose.Schema(
+  {
+    name: { 
+      type: String, 
+      required: [true, "Please add a name"] 
+    },
+    email: { 
+      type: String, 
+      required: [true, "Please add an email"], 
+      unique: true 
+    },
+    password: { 
+      type: String, 
+      required: [true, "Please add a password"] 
+    },
+  },
+  { 
+    // Automatically add createdAt and updatedAt timestamps
+    timestamps: true 
+  }
+);
 
-const userSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    verifyOtp: { type: String, default: '' },
-    verifyOtpExpireAt: { type: Number, default: 0 },
-    isAccountVerified: { type: Boolean, default: false },
-    resetOtp: { type: String, default: '' },
-    resetOtpExpireAt: { type: Number, default: 0 },
-})
+// Prevent mongoose from redefining the model if it already exists
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 
-const userModel =mongoose.model.user || mongoose.model('user',userSchema);
-
-export default userModel;
+export default User;
